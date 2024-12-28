@@ -1,0 +1,118 @@
+// #include <Arduino.h>
+// #include <LiquidCrystal.h>
+
+// // Khai báo các chân kết nối LCD
+// const int RS = 12;
+// const int E = 11;
+// const int D4 = 5;
+// const int D5 = 4;
+// const int D6 = 3;
+// const int D7 = 2;
+
+// // Khởi tạo đối tượng LCD với các chân được chỉ định
+// LiquidCrystal lcd(RS, E, D4, D5, D6, D7);
+
+// void setup() {
+//   // Khởi tạo UART với tốc độ baud 9600
+//   Serial.begin(9600); 
+//   while (!Serial) {
+//     ; // Đợi kết nối UART
+//   }
+  
+//   // Khởi tạo LCD
+//   lcd.begin(16, 2); // Thiết lập LCD với 16 cột, 2 hàng
+//   lcd.setCursor(0, 0);
+//   lcd.print("Arduino Ready!"); // Hiển thị trạng thái sẵn sàng
+//   delay(2000); // Chờ 2 giây
+//   lcd.clear(); // Xóa màn hình LCD
+// }
+
+// void loop() {
+//   if (Serial.available() > 0) { // Kiểm tra nếu có dữ liệu nhận được
+//     String receivedData = Serial.readString(); // Đọc dữ liệu từ UART
+//     Serial.print("Dữ liệu nhận được: "); 
+//     Serial.println(receivedData); // Phản hồi lại dữ liệu qua UART
+    
+//     // Hiển thị dữ liệu lên màn hình LCD
+//     lcd.clear(); // Xóa màn hình LCD trước khi hiển thị dữ liệu mới
+//     lcd.setCursor(0, 0); // Đặt con trỏ ở cột 0, hàng 0
+//     lcd.print("Data:"); 
+//     lcd.setCursor(0, 1); // Đặt con trỏ ở cột 0, hàng 1
+//     lcd.print(receivedData); // Hiển thị dữ liệu nhận được
+
+//     delay(2000); // Hiển thị trong 2 giây trước khi xóa màn hình
+//   }
+// }
+
+
+#include <Arduino.h>
+#include <LiquidCrystal.h>
+
+// Khai báo các chân kết nối LCD
+const int RS = 12;
+const int E = 11;
+const int D4 = 5;
+const int D5 = 4;
+const int D6 = 3;
+const int D7 = 2;
+
+// Khởi tạo đối tượng LCD
+LiquidCrystal lcd(RS, E, D4, D5, D6, D7);
+
+// Biến lưu số lượng Tomato và Carrot
+int tomatoCount = 0;
+int carrotCount = 0;
+
+// Khai báo prototype hàm
+void parseAndDisplayData(String data);
+
+void setup() {
+  // Khởi tạo UART và LCD
+  Serial.begin(9600);
+  lcd.begin(16, 2); // Thiết lập LCD với 16 cột, 2 hàng
+
+  // Hiển thị trạng thái ban đầu
+  lcd.setCursor(0, 0);
+  lcd.print("TOMATO: 0");
+  lcd.setCursor(0, 1);
+  lcd.print("CARROT: 0");
+}
+
+void loop() {
+  if (Serial.available() > 0) { // Kiểm tra nếu có dữ liệu nhận được qua UART
+    String receivedData = Serial.readString(); // Đọc dữ liệu từ Python
+    Serial.print("Dữ liệu nhận được: "); 
+    Serial.println(receivedData);
+
+    // Gọi hàm xử lý dữ liệu
+    parseAndDisplayData(receivedData);
+  }
+}
+
+// Định nghĩa hàm xử lý và hiển thị dữ liệu
+void parseAndDisplayData(String data) {
+  int tIndex = data.indexOf("T:"); // Vị trí của "T:"
+  int cIndex = data.indexOf("C:"); // Vị trí của "C:"
+  int commaIndex = data.indexOf(","); // Vị trí của dấu ","
+
+  // Kiểm tra định dạng dữ liệu
+  if (tIndex != -1 && cIndex != -1 && commaIndex != -1) {
+    // Lấy số lượng Tomato
+    tomatoCount = data.substring(tIndex + 2, commaIndex).toInt();
+
+    // Lấy số lượng Carrot
+    carrotCount = data.substring(cIndex + 2).toInt();
+
+    // Hiển thị dữ liệu lên LCD
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("TOMATO: ");
+    lcd.print(tomatoCount);
+    lcd.setCursor(0, 1);
+    lcd.print("CARROT: ");
+    lcd.print(carrotCount);
+  } else {
+    Serial.println("Dữ liệu không hợp lệ!");
+  }
+}
+
